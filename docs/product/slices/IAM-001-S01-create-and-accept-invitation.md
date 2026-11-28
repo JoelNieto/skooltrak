@@ -69,7 +69,7 @@ And submitting step 1 again returns 409 "La organización ya tiene escuelas"
 - Removing "Crear una Escuela" and locking the existing `/organizations` CRUD (S02). Self-service creation keeps working until S02 ships.
 - Resend, revoke, copy link, specific unusable-link states, expiry choice (S03).
 - Delivery-failure status, filters, search (S04). In this slice a send failure is logged and the invitation stays `SENT`.
-- Existing-account acceptance (S05). If the email already has an account, accept returns 409 "Este correo ya tiene una cuenta" for now.
+- Existing-account acceptance and the create-time refusal of emails already in an organization (S05, BR .13). In this slice, if the email already has an account, accept returns 409 "Este correo ya tiene una cuenta".
 - Setup progress n/5 and the detail page (S06).
 
 ## Done checklist

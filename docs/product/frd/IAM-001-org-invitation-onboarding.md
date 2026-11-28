@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft |
+| **Status** | Ready |
 | **Context** | IAM — Identity & Access (see [capabilities](../capabilities.md)) |
 | **Owner** | Joel Nieto |
 | **Last updated** | 2026-11-28 |
@@ -48,8 +48,10 @@ When this ships, a platform admin (`SYSADMIN`) creates the organization in `web-
 **Invitee**
 - **FR-IAM-001.11** — Invitee opening a valid link sees the organization name, the steps ahead, and a form with their email locked and their name prefilled. They set a password and accept the terms to create their account ("Crear cuenta y continuar").
 - **FR-IAM-001.12** — On acceptance the invitee becomes `ORG_ADMIN` of the invited organization. The existing per-organization `ORG_ADMIN` role, `Member` and `organizationId` assignments are reused. Their email is marked verified and they land on `/onboarding/setup`.
-- **FR-IAM-001.13** — Invitee whose email already has a Skooltrak account can sign in from the link ("Inicia sesión para aceptar") and accept. Whether that is allowed for accounts already in another organization is Open question 1.
+- **FR-IAM-001.13** — Invitee whose email already has a Skooltrak account **with no organization** (for example, a user who signed up but never joined a school) can sign in from the link ("Inicia sesión para aceptar") and accept. Emails that already belong to an organization are refused when the invitation is created (BR .13).
 - **FR-IAM-001.14** — Invitee opening an unusable link sees a dedicated state instead of the form: *Esta invitación venció*, *Este enlace ya no es válido* (revoked or superseded), *Ya aceptaste esta invitación* (→ sign in, resume setup), *Esta invitación es para otra cuenta* (signed in with another email → "Cerrar sesión y continuar").
+
+- **FR-IAM-001.18** — Invitee on an expired link can press "Pedir un enlace nuevo". Every platform admin is notified by email ("{org}: {invitee} pidió un enlace nuevo"), the organization shows "Pidió un enlace nuevo" as its last activity and counts under *Requieren atención*, and the invitee sees "Avisamos al equipo de Skooltrak. Te llegará un correo con el enlace nuevo."
 
 **Setup**
 - **FR-IAM-001.15** — The first wizard step, "Tu primera escuela", creates the first school **inside the invited organization**, prefilled with the organization name. It does not create an organization. Steps 2–5 (grados, planes de estudio, cursos, grupos) are unchanged.
@@ -73,13 +75,17 @@ When this ships, a platform admin (`SYSADMIN`) creates the organization in `web-
 - **BR-IAM-001.11** — The organization is created with `onboardingCompleted = false` and **no school**. It becomes *Activa* only when `complete-onboarding` runs for a user who is `ORG_ADMIN` of that organization.
 - **BR-IAM-001.12** — Email for a new account created via an invitation is set `emailVerified = true`. Ownership was proven by the link, so the `send-verification-link` step is skipped.
 
+- **BR-IAM-001.13** — Creating an invitation (FR .1, .10) for an email whose `User` already has an `organizationId` returns **409** "Este correo ya pertenece a otra organización; usa otro correo". The console dialog shows this inline under the email field instead of the informational notice in board 3. An existing user with no `organizationId` is allowed and accepts by signing in (FR .13).
+- **BR-IAM-001.14** — "Pedir un enlace nuevo" works only for an invitation whose state is `EXPIRED` (otherwise **409**) and at most once per invitation per 24 h (otherwise **429** "Ya avisamos al equipo; te escribiremos pronto"). Notifying admins does **not** issue a link: a platform admin resends (FR .7), which clears the "pidió un enlace nuevo" flag.
+- **BR-IAM-001.15** — Users mid-setup from the old self-service path at release (`onboardingStep = school-setup`, organization with `onboardingCompleted = false`) keep their organization and finish the wizard as today. Their organization has no invitation row and the console shows *En configuración* (or *Activa* once complete). The first-school endpoint (BR .3) does not apply to them because their school already exists.
+
 ## 5. Data
 
-- **New model `OrganizationInvitation`** (table `organization_invitations`): `id`, `organizationId` → `Organization` (cascade), `email` (lower-cased), `firstName`, `lastName`, `tokenHash` (unique), `status` enum `OrganizationInvitationStatus { SENT, DELIVERY_FAILED, ACCEPTED, REVOKED, SUPERSEDED }`, `expiresAt`, `sentAt?`, `lastSendError?`, `sendAttempts` (int), `invitedById` → `User`, `acceptedAt?`, `acceptedByUserId?`, `revokedAt?`, `revokedById?`, `supersededById?`, `createdAt`, `updatedAt`. Indexes on `organizationId`, `email`, `(organizationId, status)`.
+- **New model `OrganizationInvitation`** (table `organization_invitations`): `id`, `organizationId` → `Organization` (cascade), `email` (lower-cased), `firstName`, `lastName`, `tokenHash` (unique), `status` enum `OrganizationInvitationStatus { SENT, DELIVERY_FAILED, ACCEPTED, REVOKED, SUPERSEDED }`, `expiresAt`, `sentAt?`, `lastSendError?`, `sendAttempts` (int), `invitedById` → `User`, `acceptedAt?`, `acceptedByUserId?`, `revokedAt?`, `revokedById?`, `supersededById?`, `linkRequestedAt?` (FR .18), `createdAt`, `updatedAt`. Indexes on `organizationId`, `email`, `(organizationId, status)`.
   - Not reused: the better-auth `Invitation` table can't store a hashed token or send failures. `AuthToken` is per-user/student and has no status lifecycle. The relationship with `Invitation` is Open question 4.
 - **`Organization`**, new fields: `setupStep Int @default(0)` (0 = not started, 1–5 = last completed wizard step), `activatedAt DateTime?` (set with `onboardingCompleted`).
 - **`User.onboardingStep`**: invitee accounts move `null → school-setup → completed`. That path is already allowed in `libs/auth/src/lib/onboarding-step.ts` (`null → SCHOOL_SETUP`), so the state machine needs no change. `choose-path → school-setup` stays only for legacy users mid-setup at release.
-- **Audit**: extend `OnboardingAuditAction` with `ORG_INVITATION_CREATED`, `ORG_INVITATION_RESENT`, `ORG_INVITATION_REVOKED`, `ORG_INVITATION_ACCEPTED`, `ORG_INVITATION_EMAIL_FAILED`, `ORG_SETUP_STEP_COMPLETED`, `ORG_ACTIVATED`, written to `OnboardingAuditLog` with `organizationId`, `actorId` and `userId`. The detail page's activity log (FR .6) reads from it.
+- **Audit**: extend `OnboardingAuditAction` with `ORG_INVITATION_CREATED`, `ORG_INVITATION_RESENT`, `ORG_INVITATION_REVOKED`, `ORG_INVITATION_ACCEPTED`, `ORG_INVITATION_EMAIL_FAILED`, `ORG_INVITATION_LINK_REQUESTED`, `ORG_SETUP_STEP_COMPLETED`, `ORG_ACTIVATED`, written to `OnboardingAuditLog` with `organizationId`, `actorId` and `userId`. The detail page's activity log (FR .6) reads from it.
 - **Tenancy**: console endpoints are cross-organization by design (`SYSADMIN` only). Every invitee endpoint resolves the organization **from the token**, never from the request body. Setup endpoints use the caller's JWT `organizationId`.
 
 ## 6. API surface
@@ -97,11 +103,12 @@ All paths under `/api/v1`. Console endpoints live in `libs/auth` `OrganizationsC
 | `GET /organizations/invitations/:invitationId/link` | Return the link (re-issues the token if the plain one isn't recoverable, see Open question 5) | `SYSADMIN` | .9 |
 | `GET /auth/org-invitations/:token` | Public preview: org name, invitee name/email, expiry, or state code | `@AllowAnonymous` | .11 .14 |
 | `POST /auth/org-invitations/:token/accept` | `{ firstName, lastName, password, acceptTerms }` for a new account, or empty body with a session for an existing one → JWT | `@AllowAnonymous` / session | .11 .12 .13 |
+| `POST /auth/org-invitations/:token/request-new-link` | Notify platform admins of an expired link | `@AllowAnonymous` (rate-limited) | .18 |
 | `POST /auth/setup/first-school` | Create first school in caller's org | `ORG_ADMIN` of caller org | .15 |
 | `POST /auth/setup/step` | `{ step: 1..5 }` record progress | `ORG_ADMIN` of caller org | .16 |
 | `POST /auth/create-school-with-organization` | **Changed:** 403 per BR .3 (removed after one release) | — | .17 |
 
-Side effects: invitation email (Resend). There are no sockets or cron jobs. Expiry is derived at read time.
+Side effects: invitation email and "pidió un enlace nuevo" email to every `SYSADMIN` user (Resend). There are no sockets or cron jobs. Expiry is derived at read time.
 
 ## 7. UX
 
@@ -131,22 +138,25 @@ Design reference: the approved canvas, boards 1–9.
 
 ## 10. Open questions
 
-- [ ] **1. Existing account in another organization** (blocks S05). `User` has a single `organizationId`/`roleId`, so a parent at school A can't also be `ORG_ADMIN` of B. Proposal: refuse at create time with 409 "Este correo ya pertenece a otra organización; usa otro correo", and allow existing accounts only when they have no organization.
-- [ ] **2. "Pedir un enlace nuevo" on an expired link** (blocks S03). Should it notify platform admins (in-app, or an email to a support address), or should the page just say to contact Skooltrak?
-- [ ] **3. Contact destination** for "Solicitar una demostración" on choose-path (URL or email). Blocks S02's copy only.
-- [ ] **4. Better-auth `Invitation` table**: nothing in the product uses it except the dashboard's `/accept-invitation/:id`. Keep it as is, or deprecate it in a later IAM FRD?
-- [ ] **5. "Copiar enlace" with hashed tokens**: the plain token can't be recovered after creation. Proposal: copying re-issues the token (equivalent to a silent resend without email) and logs `ORG_INVITATION_RESENT`. Alternative: store the token encrypted.
-- [ ] **6. Gap found (fixed by S02)**: `OrganizationsController` (`libs/auth/src/lib/organizations/organizations.controller.ts`) lets **any authenticated user** create, list, update and delete organizations (`BetterAuthGuard` only), and `web-admin` doesn't check the role at login. Both are pre-existing and covered by BR .1 and BR .2.
-- [ ] **7. Legacy users mid-setup** at release (`onboardingStep = school-setup` from self-service): let them finish (recommended), or reset them?
+**Resolved (2026-11-28)**
+- [x] **1. Existing account in another organization**: refuse at create time (BR .13). Existing accounts with no organization may accept by signing in (FR .13).
+- [x] **2. "Pedir un enlace nuevo"**: notifies every platform admin by email and flags the organization in the console (FR .18, BR .14).
+- [x] **7. Legacy users mid-setup at release**: they finish the wizard as today (BR .15).
+- [x] **6. Gap found**: `OrganizationsController` (`libs/auth/src/lib/organizations/organizations.controller.ts`) lets any authenticated user create, list, update and delete organizations (`BetterAuthGuard` only), and `web-admin` doesn't check the role at login. Accepted as scope: S02 fixes both (BR .1, BR .2).
+
+**Deferred**
+- [ ] **3. Contact destination** for "Solicitar una demostración" on choose-path (URL or email). Decide before S02 starts; it affects copy only.
+- [ ] **4. Better-auth `Invitation` table**: nothing in the product uses it except the dashboard's `/accept-invitation/:id`. Left as is; to be reviewed in a later IAM FRD.
+- [ ] **5. "Copiar enlace" with hashed tokens**: the plain token can't be recovered after creation. Proposal: copying re-issues the token (a silent resend without email) and logs `ORG_INVITATION_RESENT`. Alternative: store the token encrypted. Decide before S03 starts.
 
 ## 11. Slices
 
 | Slice | Title | FRs / BRs | Status |
 |---|---|---|---|
 | [IAM-001-S01](../slices/IAM-001-S01-create-and-accept-invitation.md) | Create org with admin invitation → accept with new account → first school in invited org | .1 .2 .11 .12 .15 · BR .1 (new endpoints) .3 (first-school) .4 .5 .6 .11 .12 | Ready |
-| IAM-001-S02 | Close self-service creation: lock org endpoints and web-admin to SYSADMIN, choose-path without "Crear escuela" | .17 · BR .1 (existing endpoints) .2 .3 | Proposed |
-| IAM-001-S03 | Resend, revoke, copy link and unusable-link states | .3 .7 .8 .9 .14 · BR .5 .7 .8 .9 | Proposed |
+| IAM-001-S02 | Close self-service creation: lock org endpoints and web-admin to SYSADMIN, choose-path without "Crear escuela" | .17 · BR .1 (existing endpoints) .2 .3 .15 | Proposed |
+| IAM-001-S03 | Resend, revoke, copy link, unusable-link states and "Pedir un enlace nuevo" | .3 .7 .8 .9 .14 .18 · BR .5 .7 .8 .9 .14 | Proposed |
 | IAM-001-S04 | Delivery failures, status column, filters and search | .4 .5 · BR .10 | Proposed |
-| IAM-001-S05 | Accept with an existing account and wrong-account state | .13 .14 (otra cuenta) · BR .6 | Proposed (blocked by Q1) |
+| IAM-001-S05 | Accept with an existing account (no organization), wrong-account state, refuse emails already in an organization | .13 .14 (otra cuenta) · BR .6 .13 | Proposed |
 | IAM-001-S06 | Setup progress n/5, Activa, org detail page with activity log | .6 .16 | Proposed |
 | IAM-001-S07 | Invite additional administrators | .10 · BR .7 | Proposed |

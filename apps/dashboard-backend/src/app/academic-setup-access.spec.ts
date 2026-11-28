@@ -17,7 +17,11 @@ jest.mock('./groups-schedules/groups-schedules.service', () => ({ GroupsSchedule
 
 import { Perm, PERMISSIONS_KEY } from '@/auth';
 import { DegreesController } from './degrees/degrees.controller';
-import { COURSE_MISMATCH, GROUP_DENIED, GroupsSchedulesController } from './groups-schedules/groups-schedules.controller';
+import {
+  COURSE_MISMATCH,
+  GROUP_DENIED,
+  GroupsSchedulesController,
+} from './groups-schedules/groups-schedules.controller';
 import { SCHOOL_DENIED } from './org-scope';
 import { PERIODS_PLATFORM_ONLY, PeriodsController } from './periods/periods.controller';
 import { DEGREE_MISMATCH, StudyPlansController } from './study-plans/study-plans.controller';
@@ -115,7 +119,7 @@ describe('Academic setup access', () => {
     expect(service['create']).toHaveBeenCalledTimes(1);
   });
 
-  it("school periods: VIEW/MANAGE_PERIODS, own organization only", async () => {
+  it('school periods: VIEW/MANAGE_PERIODS, own organization only', async () => {
     const service = mockService();
     const controller = new PeriodsController(service as never, prisma as never);
     expect(perms(controller.schoolYear)).toEqual([Perm.VIEW_PERIODS]);
@@ -195,6 +199,8 @@ describe('Academic setup access', () => {
     expect(perms(GroupsSchedulesController)).toEqual([Perm.VIEW_SCHEDULES]);
     expect(perms(controller.create)).toEqual([Perm.MANAGE_SCHEDULES]);
     expect(perms(controller.findAll)).toEqual([Perm.MANAGE_SCHEDULES]);
+    expect(perms(controller.findTeacherBusy)).toEqual([Perm.MANAGE_SCHEDULES]);
+    await expect(controller.findTeacherBusy(admin, 'G9')).rejects.toThrow(new ForbiddenException(GROUP_DENIED));
 
     for (const req of [admin, teacher, student, parent]) await controller.findAllByClassGroupId(req, 'G1');
     expect(service['findAllByClassGroupId']).toHaveBeenCalledTimes(4);
@@ -210,12 +216,19 @@ describe('Academic setup access', () => {
     await expect(controller.create(admin, { classGroupId: 'G1', courseId: 'C9' } as never)).rejects.toThrow(
       new BadRequestException(COURSE_MISMATCH),
     );
-    await expect(controller.update(admin, { id: 'W9', weekday: 'MONDAY' } as never)).rejects.toThrow(ForbiddenException);
-    await expect(controller.update(admin, { id: 'W1', classGroupId: 'G9' } as never)).rejects.toThrow(ForbiddenException);
+    await expect(controller.update(admin, { id: 'W9', weekday: 'MONDAY' } as never)).rejects.toThrow(
+      ForbiddenException,
+    );
+    await expect(controller.update(admin, { id: 'W1', classGroupId: 'G9' } as never)).rejects.toThrow(
+      ForbiddenException,
+    );
     await expect(controller.remove(admin, 'W9')).rejects.toThrow(ForbiddenException);
 
     await controller.create(admin, { classGroupId: 'G1', courseId: 'C1' } as never);
     await controller.update(admin, { id: 'W1', weekday: 'MONDAY' } as never);
+    expect(service['assertNoClash']).toHaveBeenCalledTimes(2);
+    await controller.findTeacherBusy(admin, 'G1');
+    expect(service['findTeacherBusy']).toHaveBeenCalledWith('G1');
     await controller.findAll(admin);
     expect(service['findAll']).toHaveBeenCalledWith('org-1');
   });

@@ -6,8 +6,6 @@ import { GroupsSchedulesService } from './groups-schedules.service';
 @Module({
   controllers: [GroupsSchedulesController],
   imports: [PrismaModule],
-  providers: [
-    GroupsSchedulesService,
-  ],
+  providers: [GroupsSchedulesService],
 })
 export class GroupsSchedulesModule {}

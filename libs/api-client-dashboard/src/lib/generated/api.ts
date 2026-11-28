@@ -9146,6 +9146,40 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
+ * @summary Other groups' slots taught by this group's teachers (editor clash check)
+ */
+ groupsSchedulesControllerFindTeacherBusy<TData = void>(classGroupId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ groupsSchedulesControllerFindTeacherBusy<TData = void>(classGroupId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ groupsSchedulesControllerFindTeacherBusy<TData = void>(classGroupId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  groupsSchedulesControllerFindTeacherBusy<TData = void>(
+    classGroupId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/groups-schedules/by-class-group/${classGroupId}/teacher-busy`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/groups-schedules/by-class-group/${classGroupId}/teacher-busy`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/groups-schedules/by-class-group/${classGroupId}/teacher-busy`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary Schedules by class group
  */
  groupsSchedulesControllerFindAllByClassGroupId<TData = void>(classGroupId: string, options?: HttpClientBodyOptions): Observable<TData>;

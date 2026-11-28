@@ -1,4 +1,11 @@
-import { AuthenticatedRequest, AuthUserContext, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
+import {
+  AuthenticatedRequest,
+  AuthUserContext,
+  BetterAuthGuard,
+  Perm,
+  PermissionsGuard,
+  RequirePermissions,
+} from '@/auth';
 import {
   BadRequestException,
   Body,
@@ -47,6 +54,7 @@ export class GroupsSchedulesController {
   async create(@Req() req: AuthenticatedRequest, @Body() createGroupsScheduleInput: CreateGroupsScheduleInput) {
     const group = await this.assertGroupInOrganization(req.user, createGroupsScheduleInput.classGroupId);
     await this.assertCourseInSchool(createGroupsScheduleInput.courseId, group);
+    await this.groupsSchedulesService.assertNoClash(createGroupsScheduleInput);
     return this.groupsSchedulesService.create(createGroupsScheduleInput);
   }
 
@@ -62,6 +70,14 @@ export class GroupsSchedulesController {
   async findAllByClassGroupIdGrouped(@Req() req: AuthenticatedRequest, @Param('classGroupId') classGroupId: string) {
     await this.assertCanReadGroup(req.user, classGroupId);
     return this.groupsSchedulesService.findAllByClassGroupIdGrouped(classGroupId);
+  }
+
+  @Get('by-class-group/:classGroupId/teacher-busy')
+  @RequirePermissions(Perm.MANAGE_SCHEDULES)
+  @ApiOperation({ summary: "Other groups' slots taught by this group's teachers (editor clash check)" })
+  async findTeacherBusy(@Req() req: AuthenticatedRequest, @Param('classGroupId') classGroupId: string) {
+    await this.assertGroupInOrganization(req.user, classGroupId);
+    return this.groupsSchedulesService.findTeacherBusy(classGroupId);
   }
 
   @Get('by-class-group/:classGroupId')
@@ -91,6 +107,24 @@ export class GroupsSchedulesController {
     if (updateGroupsScheduleInput.courseId || group.id !== slot.classGroupId) {
       await this.assertCourseInSchool(updateGroupsScheduleInput.courseId ?? slot.courseId, group);
     }
+    const next = {
+      id: slot.id,
+      classGroupId: group.id,
+      courseId: updateGroupsScheduleInput.courseId ?? slot.courseId,
+      weekday: updateGroupsScheduleInput.weekday ?? slot.weekday,
+      startTime: updateGroupsScheduleInput.startTime ?? slot.startTime,
+      endTime: updateGroupsScheduleInput.endTime ?? slot.endTime,
+      recess: updateGroupsScheduleInput.recess ?? slot.recess,
+    };
+    const moved =
+      next.classGroupId !== slot.classGroupId ||
+      next.courseId !== slot.courseId ||
+      next.weekday !== slot.weekday ||
+      next.startTime !== slot.startTime ||
+      next.endTime !== slot.endTime ||
+      next.recess !== slot.recess;
+    // Only re-check when the slot moves: editing the room of an old overlapping slot stays possible.
+    if (moved) await this.groupsSchedulesService.assertNoClash(next);
     return this.groupsSchedulesService.update(slot.id, updateGroupsScheduleInput);
   }
 
@@ -106,7 +140,15 @@ export class GroupsSchedulesController {
   private async ref(id: string) {
     const slot = await this.prisma.classGroupWeeklySchedule.findUnique({
       where: { id },
-      select: { id: true, classGroupId: true, courseId: true },
+      select: {
+        id: true,
+        classGroupId: true,
+        courseId: true,
+        weekday: true,
+        startTime: true,
+        endTime: true,
+        recess: true,
+      },
     });
     if (!slot) throw new NotFoundException('Horario no encontrado');
     return slot;

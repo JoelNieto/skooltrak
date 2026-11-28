@@ -65,7 +65,14 @@ import { CommunicationApi } from '../communication/communication-api';
               </div>
             </div>
             @if (canOpenChannel()) {
-              <button uiButton variant="ghost" type="button" [loading]="openingChannel()" [disabled]="openingChannel()" (click)="openChannel()">
+              <button
+                uiButton
+                variant="ghost"
+                type="button"
+                [loading]="openingChannel()"
+                [disabled]="openingChannel()"
+                (click)="openChannel()"
+              >
                 @if (!openingChannel()) {
                   <ui-icon name="megaphone" />
                 }
@@ -108,7 +115,7 @@ import { CommunicationApi } from '../communication/communication-api';
           </div>
           <div uiTabPanel uiCard value="horario" class="p-6">
             <ng-template uiTabContent>
-              <app-group-schedule [id]="id()" />
+              <app-group-schedule [id]="id()" [groupName]="group.name" />
             </ng-template>
           </div>
           @if (canManageHabits()) {
@@ -147,7 +154,10 @@ export default class Group {
     try {
       const id = await this.communication.managedChannelFor('CLASS_GROUP', this.id());
       if (id) this.router.navigate(['/communication/channels', id]);
-      else this.router.navigate(['/communication/channels/new'], { queryParams: { scope: 'CLASS_GROUP', targetId: this.id() } });
+      else
+        this.router.navigate(['/communication/channels/new'], {
+          queryParams: { scope: 'CLASS_GROUP', targetId: this.id() },
+        });
     } catch {
       this.toast.showError('No se pudo abrir el canal');
     } finally {

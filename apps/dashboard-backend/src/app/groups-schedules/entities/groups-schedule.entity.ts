@@ -11,18 +11,18 @@ export class GroupsSchedule
       };
     }>
 {
-    id: string;
-    classGroup: ClassGroup;
-    course: Course;
-    classGroupId: string;
-    courseId: string;
-    location: string;
-    remote: boolean;
-    remoteLink: string;
-    weekday: $Enums.WeekDay;
-    startTime: string;
-    endTime: string;
-    recess: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  classGroup: ClassGroup;
+  course: Course;
+  classGroupId: string;
+  courseId: string;
+  location: string;
+  remote: boolean;
+  remoteLink: string;
+  weekday: $Enums.WeekDay;
+  startTime: string;
+  endTime: string;
+  recess: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
